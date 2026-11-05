@@ -1,0 +1,35 @@
+:root {
+  --bg: #ffffff; --text: #1f2328; --muted: #6b7280; --line: #e2e5ea;
+  --accent: #1a73e8; --accent-bg: #e8f0fe; --ok: #188038; --warn-bg: #fff7e0;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1c1f24; --text: #e6e8eb; --muted: #9aa3ae; --line: #2d3238; --accent: #8ab4f8; --accent-bg: #1f2d44; --ok: #81c995; --warn-bg: #2d2a1c; }
+}
+* { box-sizing: border-box; }
+body { width: 360px; margin: 0; background: var(--bg); color: var(--text); font: 13px/1.5 system-ui, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif; }
+section { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.ttl { font-weight: 600; word-break: break-all; }
+.url { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
+form { display: grid; gap: 8px; }
+.grid { display: grid; grid-template-columns: 1fr 90px; gap: 8px; }
+label { display: block; font-size: 11px; color: var(--muted); }
+input, select, button { font: inherit; color: inherit; }
+input, select { width: 100%; margin-top: 2px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+button { padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); cursor: pointer; }
+button:hover { background: var(--accent-bg); }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { filter: brightness(1.08); background: var(--accent); }
+.note { padding: 6px 8px; border-radius: 6px; background: var(--accent-bg); font-size: 12px; margin-bottom: 4px; }
+.note.ok { color: var(--ok); }
+ul { list-style: none; margin: 0; padding: 0; max-height: 220px; overflow: auto; }
+li { padding: 5px 6px; border-radius: 6px; cursor: pointer; background: var(--warn-bg); margin-bottom: 4px; }
+li:hover { outline: 1px solid var(--accent); }
+li .t { font-weight: 600; display: block; word-break: break-all; }
+li .m { font-size: 11px; color: var(--muted); display: block; }
+li.none { background: none; color: var(--muted); cursor: default; }
+li.none:hover { outline: none; }
+footer { display: flex; gap: 6px; padding: 10px 12px; }
+footer button { flex: 1; }

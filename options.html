@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ページ更新チェッカー</title>
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>ページ更新チェッカー</h1>
+    <div class="toolbar">
+      <button id="btnAdd" class="primary">＋ 追加</button>
+      <button id="btnCheckAll">すべてチェック</button>
+      <button id="btnReadAll">すべて既読</button>
+      <span class="spacer"></span>
+      <button id="btnImport">インポート</button>
+      <button id="btnExport">エクスポート</button>
+      <button id="btnSettings">設定</button>
+    </div>
+  </div>
+  <div class="filters">
+    <input id="q" type="search" placeholder="タイトル・URL・メッセージで検索">
+    <select id="folderFilter" title="フォルダ"></select>
+    <select id="sort" title="並び順">
+      <option value="created">登録順</option>
+      <option value="updated">更新が新しい順</option>
+      <option value="title">タイトル順</option>
+      <option value="folder">フォルダ順</option>
+    </select>
+    <label class="chk"><input id="onlyUnread" type="checkbox"> 未読のみ</label>
+    <span id="count" class="muted"></span>
+  </div>
+</header>
+
+<main>
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th class="c-sel"><input id="selAll" type="checkbox" title="すべて選択"></th>
+        <th class="c-st"></th>
+        <th class="c-title">タイトル / URL</th>
+        <th class="c-folder">フォルダ</th>
+        <th class="c-msg">更新メッセージ</th>
+        <th class="c-date">最終更新</th>
+        <th class="c-date">最終チェック</th>
+        <th class="c-meth">方式 / 間隔</th>
+        <th class="c-act"></th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="empty" class="empty" hidden>
+    <p>まだ登録がありません。</p>
+    <p class="muted">「＋ 追加」から登録するか、ブラウザのタブのURLをこの画面へドラッグ＆ドロップしてください。<br>
+    ページ上で右クリック →「このページを更新チェックに追加」でも登録できます。</p>
+  </div>
+</main>
+
+<div id="bulk" class="bulk" hidden>
+  <span id="bulkCount"></span>
+  <button id="bulkCheck">チェック</button>
+  <button id="bulkRead">既読</button>
+  <button id="bulkDelete" class="danger">削除</button>
+  <button id="bulkClear">選択解除</button>
+</div>
+
+<!-- 追加・編集 -->
+<dialog id="dlgEdit">
+  <form id="formEdit" method="dialog">
+    <h2 id="editTitle">追加</h2>
+    <label>URL
+      <input id="fUrl" type="url" required placeholder="https://example.com/news">
+    </label>
+    <label>タイトル <span class="hint">空欄なら取得したページタイトルを使います</span>
+      <input id="fTitle" type="text">
+    </label>
+    <div class="row2">
+      <label>フォルダ
+        <input id="fFolder" type="text" list="folderList" placeholder="例: 仕事/コンクリート">
+        <datalist id="folderList"></datalist>
+      </label>
+      <label>チェック間隔（分） <span class="hint">0 = 手動のみ</span>
+        <input id="fInterval" type="number" min="0" step="1">
+      </label>
+    </div>
+    <label>チェック方法
+      <select id="fMethod">
+        <option value="content">内容（本文テキストの変化）</option>
+        <option value="lastmod">更新日時（Last-Modified ヘッダー）</option>
+        <option value="size">サイズ（バイト数）</option>
+        <option value="meta">METAタグ（&lt;meta name="WWWC" content="…"&gt;）</option>
+      </select>
+    </label>
+    <fieldset id="contentOpts">
+      <legend>「内容」方式のオプション</legend>
+      <label>範囲セレクタ <span class="hint">CSSセレクタ。空欄ならページ全体。例: #news, main .list</span>
+        <input id="fSelector" type="text" placeholder="例: #news">
+      </label>
+      <label>除外セレクタ <span class="hint">広告・カウンタなど毎回変わる要素を除く</span>
+        <input id="fIgnore" type="text" placeholder="例: .ad, #counter">
+      </label>
+      <label>フィルタ（正規表現） <span class="hint">1行1つ。一致部分を取り除いて比較。「#」で始まる行はコメント</span>
+        <textarea id="fFilter" rows="3" placeholder="例: 訪問者数：\d+&#10;\d{4}/\d{2}/\d{2} \d{2}:\d{2}"></textarea>
+      </label>
+    </fieldset>
+    <label class="chk"><input id="fEnabled" type="checkbox"> 自動チェックを有効にする</label>
+    <p id="editErr" class="err" hidden></p>
+    <menu>
+      <button type="button" id="editCancel">キャンセル</button>
+      <button type="submit" class="primary" id="editSave">保存</button>
+    </menu>
+  </form>
+</dialog>
+
+<!-- 履歴（アーカイブ） -->
+<dialog id="dlgHistory" class="wide">
+  <h2 id="histTitle">履歴</h2>
+  <div class="hist">
+    <ul id="histList"></ul>
+    <div class="histMain">
+      <div class="histHead">
+        <span id="histInfo" class="muted"></span>
+        <label class="chk"><input id="histFull" type="checkbox"> 全文を表示</label>
+      </div>
+      <pre id="histBody"></pre>
+    </div>
+  </div>
+  <menu><button type="button" id="histClose">閉じる</button></menu>
+</dialog>
+
+<!-- 設定 -->
+<dialog id="dlgSettings">
+  <form id="formSettings" method="dialog">
+    <h2>設定</h2>
+    <div class="row2">
+      <label>新規登録の既定間隔（分）
+        <input id="sInterval" type="number" min="0" step="1">
+      </label>
+      <label>同時チェック数
+        <input id="sConc" type="number" min="1" max="10" step="1">
+      </label>
+    </div>
+    <div class="row2">
+      <label>アーカイブ保持数（1ページあたり）
+        <input id="sKeep" type="number" min="1" max="200" step="1">
+      </label>
+      <label>タイムアウト（秒）
+        <input id="sTimeout" type="number" min="5" max="120" step="1">
+      </label>
+    </div>
+    <label class="chk"><input id="sNotify" type="checkbox"> 更新時にデスクトップ通知を出す</label>
+    <label>共通フィルタ（正規表現） <span class="hint">全ページの「内容」方式に適用。変更すると全ページの基準を取り直します</span>
+      <textarea id="sFilter" rows="4"></textarea>
+    </label>
+    <menu>
+      <button type="button" id="setCancel">キャンセル</button>
+      <button type="submit" class="primary">保存</button>
+    </menu>
+  </form>
+</dialog>
+
+<input id="file" type="file" accept=".json,.txt,application/json,text/plain" hidden>
+<div id="toast" class="toast" hidden></div>
+<script type="module" src="options.js"></script>
+</body>
+</html>
